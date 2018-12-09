@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{4787C6F5-5309-4AC6-AEF6-916BAA433C76}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="TEST.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="UnitTest\UnittestLevenshtein.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TEST">
+        <MSBuild Projects="TEST.dproj"/>
+    </Target>
+    <Target Name="TEST:Clean">
+        <MSBuild Projects="TEST.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TEST:Make">
+        <MSBuild Projects="TEST.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="UnittestLevenshtein">
+        <MSBuild Projects="UnitTest\UnittestLevenshtein.dproj"/>
+    </Target>
+    <Target Name="UnittestLevenshtein:Clean">
+        <MSBuild Projects="UnitTest\UnittestLevenshtein.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="UnittestLevenshtein:Make">
+        <MSBuild Projects="UnitTest\UnittestLevenshtein.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TEST;UnittestLevenshtein"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TEST:Clean;UnittestLevenshtein:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TEST:Make;UnittestLevenshtein:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

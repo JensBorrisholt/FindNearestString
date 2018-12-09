@@ -6,9 +6,10 @@ uses
   System.Classes, System.Generics.Collections;
 
 type
-  TDamerauLevenshtein = record
+  TDamerauLevenshtein = class
   public
     class function Distance(const Str1, Str2: string): Integer; static;
+    class function GetDistance(const s, t: string): Integer; static;
   end;
 
   FindNearestString = record
@@ -20,9 +21,60 @@ type
 implementation
 
 uses
-  System.Sysutils, System.Math;
+  System.Sysutils, System.Math, System.Types;
 
 { TLevenshteinDistance }
+
+class function TDamerauLevenshtein.GetDistance(const s, t: string): Integer;
+  function Min(const A, B, C: Integer): Integer; overload;
+  begin
+    Result := A;
+    if B < Result then
+      Result := B;
+    if C < Result then
+      Result := C;
+  end;
+
+  function Min(const A, B: Integer): Integer; overloaD;
+  begin
+    if A < B then
+      Result := A
+    else
+      Result := B;
+  end;
+
+var
+  bounds: TPoint;
+  matrix: Array of array of Integer;
+  height, width: UINT32;
+  cost, insertion, deletion, substitution, Distance: Integer;
+
+begin
+  bounds.Y := s.Length + 1;
+  bounds.x := t.Length + 1;
+  SetLength(matrix, bounds.Y, bounds.x);
+
+  for height := 1 to bounds.Y - 1 do
+    for width := 1 to bounds.x do
+    begin
+      if (s[height - 1] = t[width - 1]) then
+        cost := 0
+      else
+        cost := 1;
+
+      insertion := matrix[height, width - 1] + 1;
+      deletion := matrix[height - 1, width] + 1;
+      substitution := matrix[height - 1, width - 1] + cost;
+      Distance := Min(insertion, deletion, substitution);
+
+      if (height > 1) and (width > 1) and (s[height - 1] = t[width - 2]) and (s[height - 2] = t[width - 1]) then
+        Distance := Min(Distance, matrix[height - 2, width - 2] + cost);
+
+      matrix[height, width] := Distance;
+    end;
+
+  Result := matrix[bounds.Y - 1, bounds.x - 1];
+end;
 
 class function TDamerauLevenshtein.Distance(const Str1, Str2: string): Integer;
   function Min(const A, B, C: Integer): Integer;
@@ -36,47 +88,18 @@ class function TDamerauLevenshtein.Distance(const Str1, Str2: string): Integer;
 
 var
   LenStr1, LenStr2: Integer;
-  i, j, t, cost, PrevCost: Integer;
+  i, j, cost, PrevCost: Integer;
   pStr1, pStr2, S1, S2: PChar;
   d: PIntegerArray;
 begin
-  LenStr1 := length(Str1);
-  LenStr2 := length(Str2);
+  LenStr1 := Length(Str1);
+  LenStr2 := Length(Str2);
 
-  // save a bit memory by making the second index points to the shorter string
-  if LenStr1 < LenStr2 then
-  begin
-    t := LenStr1;
-    LenStr1 := LenStr2;
-    LenStr2 := t;
-    pStr1 := PChar(Str2);
-    pStr2 := PChar(Str1);
-  end
-  else
-  begin
-    pStr1 := PChar(Str1);
-    pStr2 := PChar(Str2);
-  end;
+  if LenStr1 * LenStr2 = 0 then
+    Exit(Max(LenStr1, LenStr1));
 
-  // bypass leading identical characters
-  while (LenStr2 <> 0) and (pStr1^ = pStr2^) do
-  begin
-    Inc(pStr1);
-    Inc(pStr2);
-    Dec(LenStr1);
-    Dec(LenStr2);
-  end;
-
-  // bypass trailing identical characters
-  while (LenStr2 <> 0) and ((pStr1 + LenStr1 - 1)^ = (pStr2 + LenStr2 - 1)^) do
-  begin
-    Dec(LenStr1);
-    Dec(LenStr2);
-  end;
-
-  // is the shorter string empty? so, the edit distance is length of the longer one
-  if LenStr2 = 0 then
-    Exit(LenStr1);
+  pStr1 := PChar(Str1);
+  pStr2 := PChar(Str2);
 
   // calculate the edit distance
   GetMem(d, (LenStr2 + 1) * SizeOf(Integer));
@@ -93,6 +116,9 @@ begin
 
     for j := 1 to LenStr2 do
     begin
+      if (I = 3) and (j = 3) then
+        PrevCost := PrevCost;
+
       if (S1^ = S2^) or ((i > 1) and (j > 1) and (S1^ = (S2 - 1)^) and (S2^ = (S1 - 1)^)) then
         cost := PrevCost
       else

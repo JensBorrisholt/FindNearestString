@@ -39,27 +39,29 @@ procedure TFormMain.Button1Click(Sender: TObject);
 var
   StopWatch: TStopwatch;
   aWord: string;
+const
+  SEARCH_WORD = 'HEST';
 begin
   Memo1.Lines.Clear;
 
   StopWatch := TStopwatch.StartNew;
-  aWord := FindNearestString.Get(WordList, 'Hest');
+  aWord := FindNearestString.Get(WordList, SEARCH_WORD, False);
   StopWatch.Stop;
 
   Memo1.Lines.Add('');
   Memo1.Lines.Add('Test 1: TStrings');
   Memo1.Lines.Add('Number of elements in list: ' + IntStr(WordList.Count));
-  Memo1.Lines.Add('Nearest word to "Hest": ' + aWord);
+  Memo1.Lines.Add('Nearest word to "' + SEARCH_WORD + '": ' + aWord);
   Memo1.Lines.Add('Elapsed Milliseconds: ' + IntStr(StopWatch.ElapsedMilliseconds));
   Memo1.Lines.Add('Average speed elements/ms: ' + IntStr(WordList.Count / StopWatch.ElapsedMilliseconds));
 
   StopWatch := TStopwatch.StartNew;
-  aWord := FindNearestString.Get(gWordList, 'Hest');
+  aWord := FindNearestString.Get(gWordList, SEARCH_WORD, False);
   StopWatch.Stop;
   Memo1.Lines.Add('');
   Memo1.Lines.Add('Test 2: TEnumerable<string>');
   Memo1.Lines.Add('Number of elements in list: ' + IntStr(gWordList.Count));
-  Memo1.Lines.Add('Nearest word to "Hest": ' + aWord);
+  Memo1.Lines.Add('Nearest word to "' + SEARCH_WORD + '": ' + aWord);
   Memo1.Lines.Add('Elapsed Milliseconds: ' + IntStr(StopWatch.ElapsedMilliseconds));
   Memo1.Lines.Add('Average speed elements/ms: ' + IntStr(gWordList.Count / StopWatch.ElapsedMilliseconds));
 end;
@@ -67,25 +69,21 @@ end;
 procedure TFormMain.FormCreate(Sender: TObject);
 var
   List: TStringlist;
-  s, t, PasFile: string;
+  s, t: string;
 begin
   List := TStringlist.Create;
   WordList := TStringlist.Create;
   gWordList := TList<string>.Create;
 
-  for PasFile in TDirectory.GetFiles('C:\Program Files (x86)\Embarcadero\Studio\19.0\source\', '*.pas', TSearchOption.soAllDirectories) do
+  List.LoadFromFile('../../../In Search of Lost Time/Swann''s Way .txt');
+  for s in List do
   begin
-    List.LoadFromFile(PasFile);
-    for s in List do
-    begin
-      for t in s.Split([#32]) do
-
-        if t.Trim <> '' then
-        begin
-          WordList.Add(t);
-          gWordList.Add(t);
-        end;
-    end;
+    for t in s.Split([#32]) do
+      if t.Trim <> '' then
+      begin
+        WordList.Add(t);
+        gWordList.Add(t);
+      end;
   end;
 
   List.Free;
