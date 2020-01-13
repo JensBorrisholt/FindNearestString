@@ -14,8 +14,8 @@ type
 
   FindNearestString = record
   public
-    class function Get(aSourceList: TStrings; aComapreString: string; aCaseSensetive: Boolean = false): string; overload; static;
-    class function Get(aSourceList: TEnumerable<string>; aComapreString: string; aCaseSensetive: Boolean = false): string; overload; static;
+    class function Get(aSourceList: TStrings; aCompareString: string; aCaseSensetive: Boolean = false): string; overload; static;
+    class function Get(aSourceList: TEnumerable<string>; aCompareString: string; aCaseSensetive: Boolean = false): string; overload; static;
   end;
 
 implementation
@@ -137,7 +137,7 @@ end;
 
 { TFindNearestString }
 
-class function FindNearestString.Get(aSourceList: TEnumerable<string>; aComapreString: string; aCaseSensetive: Boolean): string;
+class function FindNearestString.Get(aSourceList: TEnumerable<string>; aCompareString: string; aCaseSensetive: Boolean): string;
 var
   Distance, MinDistance: Integer;
   aWord: string;
@@ -146,14 +146,14 @@ begin
   Result := '';
 
   if not aCaseSensetive then
-    aComapreString := AnsiUpperCase(aComapreString);
+    aCompareString := AnsiUpperCase(aCompareString);
 
   for aWord in aSourceList do
   begin
     if aCaseSensetive then
-      Distance := TDamerauLevenshtein.Distance(aWord, aComapreString)
+      Distance := TDamerauLevenshtein.Distance(aWord, aCompareString)
     else
-      Distance := TDamerauLevenshtein.Distance(AnsiUpperCase(aWord), aComapreString);
+      Distance := TDamerauLevenshtein.Distance(AnsiUpperCase(aWord), aCompareString);
 
     if Distance = 0 then
       Exit(aWord);
@@ -166,7 +166,7 @@ begin
   end;
 end;
 
-class function FindNearestString.Get(aSourceList: TStrings; aComapreString: string; aCaseSensetive: Boolean): string;
+class function FindNearestString.Get(aSourceList: TStrings; aCompareString: string; aCaseSensetive: Boolean): string;
 var
   Distance, MinDistance: Integer;
   aWord: string;
@@ -175,14 +175,14 @@ begin
   Result := '';
 
   if not aCaseSensetive then
-    aComapreString := AnsiUpperCase(aComapreString);
+    aCompareString := AnsiUpperCase(aCompareString);
 
   for aWord in aSourceList do
   begin
     if aCaseSensetive then
-      Distance := TDamerauLevenshtein.Distance(aWord, aComapreString)
+      Distance := TDamerauLevenshtein.Distance(aWord, aCompareString)
     else
-      Distance := TDamerauLevenshtein.Distance(AnsiUpperCase(aWord), aComapreString);
+      Distance := TDamerauLevenshtein.Distance(AnsiUpperCase(aWord), aCompareString);
 
     if Distance = 0 then
       Exit(aWord);
